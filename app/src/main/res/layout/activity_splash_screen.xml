@@ -19,16 +19,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true">
+        android:layout_centerHorizontal="true">
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:text="@string/button_new_group"
             android:background="@drawable/rounded_button"
-            android:textColor="#ffffff"/>
+            android:textColor="#ffffff"
             android:text="@string/button_new_group"
             android:id="@+id/btnCreateGroup"/>
 
@@ -36,9 +34,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:text="@string/button_join_group"
             android:background="@drawable/rounded_button"
-            android:textColor="#ffffff"/>
+            android:textColor="#ffffff"
+            android:text="@string/button_join_group"
+            android:id="@+id/btnJoinGroup"/>
 
     </LinearLayout>
 
