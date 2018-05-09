@@ -10,8 +10,9 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/party_people_2_cut"
-        android:scaleType = "centerCrop"/>
+        android:src="@drawable/party_people_2_cut_skaled"
+        android:scaleType = "centerCrop"
+        android:contentDescription="Party People"/>
 
 
     <LinearLayout
