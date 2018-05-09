@@ -25,7 +25,8 @@
         <Button
             android:layout_width="400dp"
             android:layout_height="wrap_content"
-            android:text="@string/button_new_group"/>
+            android:text="@string/button_new_group"
+            android:id="@+id/btnCreateGroup"/>
 
         <Button
             android:layout_width="400dp"
