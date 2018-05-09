@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Party Player</string>
+    <string name="button_new_group">Eine neue Gruppe erstellen</string>
+    <string name="button_join_group">Einer Gruppe beitreten</string>
+</resources>
