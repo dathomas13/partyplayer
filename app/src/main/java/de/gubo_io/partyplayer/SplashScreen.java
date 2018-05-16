@@ -16,7 +16,7 @@ public class SplashScreen extends AppCompatActivity {
         mCreateGroupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SplashScreen.this, MainActivity.class);
+                Intent intent = new Intent(SplashScreen.this, CreateGroup.class);
                 startActivity(intent);
             }
         });
