@@ -2,6 +2,7 @@ package de.gubo_io.partyplayer;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
@@ -26,6 +27,14 @@ public class MusicListAdapter extends RecyclerView.Adapter {
 
     class MusicItem extends  RecyclerView.ViewHolder{
 
+        public MusicItem(View itemView){
+            super (itemView);
+        }
 
+    }
+
+    @Override
+    public int getItemCount() {
+        return 0;
     }
 }
