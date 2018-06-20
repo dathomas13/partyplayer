@@ -2,37 +2,51 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
-    android:background="#ffffff">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="0dp"
+    android:layout_marginBottom="0dp">
 
     <ImageView
-        android:id="@+id/ivCurrentCover"
+        android:id="@+id/ivSongCover"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvSongName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Name - Interpret"
+        android:text="Name"
         android:textColor="@color/colorTextLevel0"
         android:textSize="18sp"
-        app:layout_constraintStart_toEndOf="@+id/ivCurrentCover"
-        app:layout_constraintTop_toTopOf="@+id/ivCurrentCover" />
+        app:layout_constraintEnd_toStartOf="@+id/tvIndex"
+        app:layout_constraintStart_toEndOf="@+id/ivSongCover"
+        app:layout_constraintTop_toTopOf="@+id/ivSongCover" />
 
     <TextView
-        android:id="@+id/tvNumber"
+        android:id="@+id/tvInterpret"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Interpret"
+        android:textColor="@color/colorTextLevel1"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ivSongCover"
+        app:layout_constraintTop_toBottomOf="@+id/tvSongName" />
+
+    <TextView
+        android:id="@+id/tvIndex"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -42,28 +56,34 @@
         android:textColor="@color/colorTextLevel1"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/ivCurrentCover" />
+        app:layout_constraintTop_toTopOf="@+id/ivSongCover" />
 
     <Button
         android:id="@+id/btVoteDown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
         android:text="Bitte Nicht"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btUpDown" />
+        app:layout_constraintEnd_toStartOf="@+id/btVoteUp"
+        app:layout_constraintTop_toBottomOf="@+id/tvInterpret" />
 
     <Button
-        android:id="@+id/btUpDown"
+        android:id="@+id/btVoteUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:text="Yeahh"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btVoteDown" />
+
+    <View
+        android:id="@+id/vSeparator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_margin="8dp"
+        android:background="#c7c7c7"
+        app:layout_constraintTop_toBottomOf="@id/btVoteDown"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

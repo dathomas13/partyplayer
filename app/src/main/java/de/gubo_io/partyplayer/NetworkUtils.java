@@ -1,0 +1,253 @@
+package de.gubo_io.partyplayer;
+
+import android.app.Activity;
+import android.arch.core.util.Function;
+import android.content.Context;
+import android.util.Log;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.spotify.sdk.android.player.Config;
+import com.spotify.sdk.android.player.ConnectionStateCallback;
+import com.spotify.sdk.android.player.Player;
+import com.spotify.sdk.android.player.Spotify;
+import com.spotify.sdk.android.player.SpotifyPlayer;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class NetworkUtils {
+
+    static int errorCounter = 0;
+
+    public interface OnMetaReceivedListener{
+        public void onMetaReceived(SongInformation mSongInfo);
+    }
+
+    private OnMetaReceivedListener onMetaReceivedListener;
+
+    public void setOnMetaReceivedListener(OnMetaReceivedListener onMetaReceivedListener) {
+        this.onMetaReceivedListener = onMetaReceivedListener;
+    }
+
+    public interface OnTokenExpiredListener{
+        void onTokenExpired(String spotifyId);
+    }
+
+    private OnTokenExpiredListener onTokenExpiredListener;
+
+    public void setOnTokenExpiredListener(OnTokenExpiredListener onTokenExpiredListener) {
+        this.onTokenExpiredListener = onTokenExpiredListener;
+    }
+
+    public void getSongMeta(final String spotifyId, final String accessToken, Context context) {
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = "https://api.spotify.com/v1/tracks/" + spotifyId;
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONObject albumInfo = response.getJSONObject("album");
+
+                            String name = response.getString("name");
+
+                            String artistsStr = "";
+                            JSONArray artists = albumInfo.getJSONArray("artists");
+                            for (int i = 0; i < artists.length(); i++){
+                                JSONObject artist = artists.getJSONObject(i);
+                                if (artists.length()>1) {
+                                    if (i < artists.length() - 1)
+                                        artistsStr += "und";
+                                    else
+                                        artistsStr += ", ";
+                                }
+                                artistsStr += artist.getString("name");
+                            }
+
+                            SongInformation mSongInfo = new SongInformation(name, artistsStr, spotifyId);
+
+                            Log.d("song name", mSongInfo.getName());
+
+                            onMetaReceivedListener.onMetaReceived(mSongInfo);
+
+
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String jsonError = new String(networkResponse.data);
+                            Log.e("Response", jsonError);
+
+                            try {
+                                JSONObject jsonErrorObj = new JSONObject(jsonError).getJSONObject("error");
+                                int errorStatus = jsonErrorObj.getInt("status");
+                                String errorMessage = jsonErrorObj.getString("message");
+
+                                if (errorStatus == 401){
+                                    if (errorMessage.equals("The access token expired")){
+                                        if(errorCounter < 5)
+                                            onTokenExpiredListener.onTokenExpired(spotifyId);
+
+                                        errorCounter++;
+                                    }
+                                }
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
+
+                        }
+                        Log.d("ERROR","error => " + error.toString());
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<>();
+                params.put("Content-Type", "application/json");
+                params.put("Authorization", "Bearer " + accessToken);
+                return params;
+            }
+        };
+
+        queue.add(jsonObjectRequest);
+    }
+
+    static void addSong(SongInformation song, int groupId, Context context){
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = "http://gubo-io.de/partyplayer/add_song.php";
+
+        Map<String, String> postParam= new HashMap<String, String>();
+        postParam.put("groupId", groupId+"");
+        postParam.put("spotifyId", song.getSpotifyId());
+        postParam.put("name", song.getName());
+        postParam.put("artists", song.getArtists());
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.POST, url, new JSONObject(postParam), new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            String status = response.getString("status");
+                            Log.d("status", status);
+
+
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String jsonError = new String(networkResponse.data);
+                            Log.e("Response", jsonError);
+                        }
+                        Log.d("ERROR","error => " + error.toString());
+                    }
+                });
+
+        queue.add(jsonObjectRequest);
+    }
+
+    public interface OnSongsReceivedListener{
+        void onSongsReceived(List<SongInformation> songs);
+    }
+
+    private OnSongsReceivedListener onSongsReceivedListener;
+
+    public void setOnSongsReceivedListener(OnSongsReceivedListener onSongsReceivedListener) {
+        this.onSongsReceivedListener = onSongsReceivedListener;
+    }
+
+    void getSongs(int groupId, Context context){
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = "http://gubo-io.de/partyplayer/get_songs.php";
+
+        Map<String, String> postParam= new HashMap<String, String>();
+        postParam.put("groupId", groupId+"");
+
+        int postParams[] = {groupId};
+
+        JSONArray postArr = new JSONArray();
+        try {
+            postArr = new JSONArray(postParams);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        JsonArrayRequest jsonObjectRequest = new JsonArrayRequest
+                (Request.Method.POST, url, postArr, new Response.Listener<JSONArray>() {
+
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            String status = response.toString();
+
+
+                            List<SongInformation> mSongList = new ArrayList<>();
+                            for (int i = 0; i < response.length(); i++){
+                                SongInformation songInformation = new SongInformation();
+                                JSONObject song = response.getJSONObject(i);
+                                songInformation.setName(song.getString("name"));
+                                songInformation.setArtists(song.getString("artists"));
+                                songInformation.setSpotifyId(song.getString("spotifyId"));
+                                songInformation.setUpVotes(song.getInt("upVotes"));
+                                songInformation.setDownVotes(song.getInt("downVotes"));
+                                mSongList.add(songInformation);
+                            }
+
+                            onSongsReceivedListener.onSongsReceived(mSongList);
+
+                            Log.d("status", status);
+
+
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String jsonError = new String(networkResponse.data);
+                            Log.e("Response", jsonError);
+                        }
+                        Log.d("ERROR","error => " + error.toString());
+                    }
+                });
+
+        queue.add(jsonObjectRequest);
+    }
+
+}

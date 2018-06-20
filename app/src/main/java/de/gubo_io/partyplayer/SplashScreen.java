@@ -44,6 +44,14 @@ public class SplashScreen extends AppCompatActivity {
                 intentIntegrator.initiateScan();
             }
         });
+        Button mShowMain = findViewById(R.id.btnShowMain);
+        mShowMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SplashScreen.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 

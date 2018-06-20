@@ -34,6 +34,14 @@
             android:layout_margin="16dp"
             android:background="@drawable/rounded_button"
             android:textColor="#ffffff"
+            android:text="Main anzeigen"
+            android:id="@+id/btnShowMain"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@drawable/rounded_button"
+            android:textColor="#ffffff"
             android:text="@string/button_new_group"
             android:id="@+id/btnCreateGroup"/>
 
