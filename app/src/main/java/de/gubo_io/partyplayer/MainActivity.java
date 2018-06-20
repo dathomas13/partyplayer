@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         spotifyAccessToken = sharedPref.getString(ACCESS_TOKEN_NAME, "");
 
 
+
         if (!spotifyAccessToken.equals("")){
             setSpotifyPlayer();
         } else {
@@ -102,6 +103,18 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mSongListView.setLayoutManager(mLayoutManager);
         final MusicListAdapter mMusicListAdapter = new MusicListAdapter(getApplicationContext(), mSongList);
         mSongListView.setAdapter(mMusicListAdapter);
+
+        // LOAD SONGS
+        NetworkUtils networkUtils = new NetworkUtils();
+        networkUtils.setOnSongsReceivedListener(new NetworkUtils.OnSongsReceivedListener() {
+            @Override
+            public void onSongsReceived(List<SongInformation> songs) {
+                mSongList = songs;
+                mMusicListAdapter.setSongList(mSongList);
+            }
+        });
+        networkUtils.getSongs(groupId, getApplicationContext());
+        // SONGS LOADED
 
         FloatingActionButton fab = findViewById(R.id.fabAdd);
         fab.setOnClickListener(new View.OnClickListener() {
