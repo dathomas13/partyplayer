@@ -1,9 +1,13 @@
 package de.gubo_io.partyplayer;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -27,7 +31,9 @@ import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
+import com.spotify.sdk.android.player.Connectivity;
 import com.spotify.sdk.android.player.Error;
+import com.spotify.sdk.android.player.PlaybackState;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
@@ -45,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private static final String ACCESS_TOKEN_NAME = "spotifyAccessToken";
 
     private Player mPlayer;
+    private PlaybackState mCurrentPlaybackState;
     private String spotifyAccessToken;
     List<SongInformation> mSongList = new ArrayList<>();
     final MusicListAdapter mMusicListAdapter = new MusicListAdapter();
@@ -52,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private int groupId = 1;
 
     private int currentSong = -1;
+
+    private BroadcastReceiver mNetworkStateReceiver;
 
     private TextView mCurrentSongNameView;
     private TextView mCurrentInterpretView;
@@ -66,13 +75,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         spotifyAccessToken = sharedPref.getString(ACCESS_TOKEN_NAME, "");
         groupId = sharedPref.getInt("groupId", -1);
 
-
-
-       /* if (!spotifyAccessToken.equals("")){
-            setSpotifyPlayer();
-        } else {
-            showSpotifyLoginDialog();
-        }*/
 
         if (isPlayer)
             showSpotifyLoginDialog();
@@ -124,6 +126,29 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     }
 
+    private final Player.OperationCallback mOperationCallback = new Player.OperationCallback() {
+        @Override
+        public void onSuccess() {
+            Log.d("operation callback:","OK!");
+        }
+
+        @Override
+        public void onError(Error error) {
+            Log.e("operation callback:",error.toString());
+        }
+    };
+
+    private Connectivity getNetworkConnectivity(Context context) {
+        ConnectivityManager connectivityManager;
+        connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        if (activeNetwork != null && activeNetwork.isConnected()) {
+            return Connectivity.fromNetworkType(activeNetwork.getType());
+        } else {
+            return Connectivity.OFFLINE;
+        }
+    }
+
     void showSpotifyLoginDialog() {
 
         LayoutInflater inflater = this.getLayoutInflater();
@@ -153,20 +178,47 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,
                 REDIRECT_URI);
-        builder.setScopes(new String[]{"user-read-private", "streaming"});
+        builder.setScopes(new String[]{"user-read-private", "playlist-read", "playlist-read-private", "streaming"});
         AuthenticationRequest request = builder.build();
 
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (requestCode == REQUEST_CODE) {
+            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+            switch (response.getType()) {
+                case TOKEN:
+                    spotifyAccessToken = response.getAccessToken();
+
+                    setSpotifyPlayer();
+
+                    SharedPreferences prefs = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString(ACCESS_TOKEN_NAME, spotifyAccessToken);
+                    editor.apply();
+
+                    loadSongs();
+                    break;
+
+                case ERROR:
+                    Log.e("spotify login error", response.getError());
+
+            }
+        }
     }
 
     void setSpotifyPlayer() {
         Log.e("accessToken", spotifyAccessToken);
         if (mPlayer == null) {
             Config playerConfig = new Config(this, spotifyAccessToken, CLIENT_ID);
-            Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
+            mPlayer = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
                 @Override
                 public void onInitialized(SpotifyPlayer spotifyPlayer) {
-                    mPlayer = spotifyPlayer;
+                    mPlayer.setConnectivityStatus(mOperationCallback, getNetworkConnectivity(MainActivity.this));
                     mPlayer.addConnectionStateCallback(MainActivity.this);
                     mPlayer.addNotificationCallback(MainActivity.this);
                 }
@@ -250,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     void queueNextSong() {
         if (mSongList.size() > currentSong + 1) {
-            Log.d("queue", "next song");
+            Log.i("queue", "next song");
             String nextTrackUri = "spotify:track:" + mSongList.get(currentSong + 1).getSpotifyId();
             mPlayer.queue(null, nextTrackUri);
         }
@@ -267,33 +319,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     void pauseSong() {
         mPlayer.pause(null);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        if (requestCode == REQUEST_CODE) {
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            switch (response.getType()) {
-                case TOKEN:
-                    spotifyAccessToken = response.getAccessToken();
-
-                    setSpotifyPlayer();
-
-                    SharedPreferences prefs = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(ACCESS_TOKEN_NAME, spotifyAccessToken);
-                    editor.apply();
-
-                    loadSongs();
-                    break;
-
-                case ERROR:
-                    Log.e("spotify login error", response.getError());
-
-            }
-        }
     }
 
     @Override
@@ -315,6 +340,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             default:
                 break;
         }
+
+        mCurrentPlaybackState = mPlayer.getPlaybackState();
+        Log.d("current Playback State:", mCurrentPlaybackState.toString());
 
     }
 
@@ -351,6 +379,41 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     @Override
     public void onConnectionMessage(String message) {
         Log.d("MainActivity", "Received connection message: " + message);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mNetworkStateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (mPlayer != null) {
+                    Connectivity connectivity = getNetworkConnectivity(getBaseContext());
+                    Log.d("Network state changed:", connectivity.toString());
+                    mPlayer.setConnectivityStatus(mOperationCallback, connectivity);
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(mNetworkStateReceiver, filter);
+
+        if (mPlayer != null) {
+            mPlayer.addNotificationCallback(MainActivity.this);
+            mPlayer.addConnectionStateCallback(MainActivity.this);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mNetworkStateReceiver);
+
+        if (mPlayer != null) {
+            mPlayer.removeNotificationCallback(MainActivity.this);
+            mPlayer.removeConnectionStateCallback(MainActivity.this);
+        }
     }
 
     @Override
