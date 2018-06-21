@@ -15,12 +15,10 @@ import java.util.List;
 
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.MusicItemViewHolder> {
     private Context context;
-    int groupId;
-    private List<SongInformation> mSongList;
+    private List<SongInformation> mSongList = new ArrayList<>();
 
-    public MusicListAdapter(Context context, List<SongInformation> songList){
+    void setContext(Context context){
         this.context = context;
-        this.mSongList = songList;
     }
 
     void setSongList(List<SongInformation> songList){
