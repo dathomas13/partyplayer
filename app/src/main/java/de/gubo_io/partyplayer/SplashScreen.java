@@ -22,10 +22,7 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-        SharedPreferences sharedPreferences = getSharedPreferences("playerPref",Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt("groupId",-1);
-        editor.apply();
+
         Button mCreateGroupButton = findViewById(R.id.btnCreateGroup);
         mCreateGroupButton.setOnClickListener(new View.OnClickListener() {
             @Override
