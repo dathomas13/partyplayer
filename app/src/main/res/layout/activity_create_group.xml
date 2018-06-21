@@ -10,10 +10,18 @@
         android:id="@+id/btnGenerateQR"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
+        android:text="Create"
         android:layout_centerHorizontal="true">
 
     </Button>
+    <Button
+        android:id="@+id/btnEnterGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter Group"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"
+        android:visibility="gone"/>
 
     <LinearLayout
         android:layout_width="match_parent"

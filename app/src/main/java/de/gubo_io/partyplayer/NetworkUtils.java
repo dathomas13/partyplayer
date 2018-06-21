@@ -25,6 +25,7 @@ import com.spotify.sdk.android.player.SpotifyPlayer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,20 @@ public class NetworkUtils {
     public void createGroup(Context context){
         RequestQueue queue = Volley.newRequestQueue(context);
         String url = "http://gubo-io.de/partyplayer/create_group.php";
-        JsonObjectRequest  jsonObjectRequest = new JsonObjectRequest
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>(){
+                    @Override
+                    public void onResponse(String response) {
+                        int groupId = Integer.parseInt(response);
+                        onGroupIdRecievedListener.onGroupIdRecieved(groupId);
+                    }
+                }, new Response.ErrorListener(){
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley",""+error.getMessage());
+                    }
+                });
+       /* JsonObjectRequest  jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -64,9 +78,8 @@ public class NetworkUtils {
                     }
                 }) {
 
-                };
-
-        queue.add(jsonObjectRequest);
+                };*/
+        queue.add(stringRequest);
     }
 
     public interface OnMetaReceivedListener{

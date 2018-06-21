@@ -1,6 +1,8 @@
 package de.gubo_io.partyplayer;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.content.ContextCompat;
@@ -10,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -22,11 +25,11 @@ import static de.gubo_io.partyplayer.ActivityDataSource.QRcodeWidth;
 public class CreateGroup extends AppCompatActivity {
 
     ImageView imageView;
-    Button button;
-    String EditTextValue ;
+    Button btnCreateGroup;
+    Button btnEnterGroup;
     Bitmap bitmap ;
-    Thread thread ;
     Context context = this;
+    int groupId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,33 +37,43 @@ public class CreateGroup extends AppCompatActivity {
         setContentView(R.layout.activity_create_group);
 
         imageView = (ImageView)findViewById(R.id.image);
-        button = (Button)findViewById(R.id.btnGenerateQR);
+        btnCreateGroup = (Button)findViewById(R.id.btnGenerateQR);
+        btnEnterGroup = (Button)findViewById(R.id.btnEnterGroup);
         final TextView textView = (TextView)findViewById(R.id.textView);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        btnCreateGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //new ActivityDataSource(textView, imageView, context).execute();
                 NetworkUtils networkUtils = new NetworkUtils();
                 networkUtils.setOnGroupIdRecievedListener(new NetworkUtils.OnGroupIdRecievedListener() {
                     @Override
                     public void onGroupIdRecieved(int groupId) {
                         try {
-                            Log.e("ADS", ""+groupId);
+                            CreateGroup.this.groupId = groupId;
+                            SharedPreferences sharedPreferences = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putInt("groupId", groupId);
+                            editor.apply();
                             bitmap = TextToImageEncode(groupId + "");
+
+                            imageView.setImageBitmap(bitmap);
+                            btnEnterGroup.setVisibility(View.VISIBLE);
                         }
                         catch (WriterException w){
                             w.getMessage();
                         }
                     }
                 });
-                Log.e("adss", "asdf");
                 networkUtils.createGroup(CreateGroup.this);
 
-                EditTextValue = textView.getText().toString();
-
-
-
+            }
+        });
+        btnEnterGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CreateGroup.this, MainActivity.class);
+                Toast.makeText(CreateGroup.this, "You joined group" + groupId, Toast.LENGTH_LONG);
+                startActivity(intent);
             }
         });
     }
