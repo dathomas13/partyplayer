@@ -60,11 +60,13 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         spotifyAccessToken = sharedPref.getString(ACCESS_TOKEN_NAME, "");
 
 
-        if (!spotifyAccessToken.equals("")){
+       /* if (!spotifyAccessToken.equals("")){
             setSpotifyPlayer();
         } else {
             showSpotifyLoginDialog();
-        }
+        }*/
+
+       showSpotifyLoginDialog();
 
         Intent intent = getIntent();
         String action = intent.getAction();
