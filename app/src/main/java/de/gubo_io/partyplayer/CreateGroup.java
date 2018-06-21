@@ -47,9 +47,9 @@ public class CreateGroup extends AppCompatActivity {
                 NetworkUtils networkUtils = new NetworkUtils();
                 networkUtils.setOnGroupIdRecievedListener(new NetworkUtils.OnGroupIdRecievedListener() {
                     @Override
-                    public void onGroupIdRecieved(int groupId) {
+                    public void onGroupIdRecieved(int _groupId) {
                         try {
-                            CreateGroup.this.groupId = groupId;
+                            CreateGroup.this.groupId = _groupId;
                             SharedPreferences sharedPreferences = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putInt("groupId", groupId);
