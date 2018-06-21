@@ -50,6 +50,10 @@ public class SplashScreen extends AppCompatActivity {
         mShowMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SharedPreferences sharedPreferences = getSharedPreferences("playerPref",Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt("groupId",1);
+                editor.apply();
                 Intent intent = new Intent(SplashScreen.this, MainActivity.class);
                 startActivity(intent);
             }
