@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private String spotifyAccessToken;
     List<SongInformation> mSongList = new ArrayList<>();
     final MusicListAdapter mMusicListAdapter = new MusicListAdapter();
-    private boolean isLoggedIn = false;
     private boolean isPlayer = true;
     private int groupId = 1;
 
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             showSpotifyLoginDialog();
         }*/
 
-       if(isPlayer && !isLoggedIn)
+       if(isPlayer)
            showSpotifyLoginDialog();
 
         Intent intent = getIntent();
@@ -115,8 +114,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mMusicListAdapter.setContext(getApplicationContext());
         mSongListView.setAdapter(mMusicListAdapter);
 
-        loadSongs();
-
         FloatingActionButton fab = findViewById(R.id.fabAdd);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,15 +122,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             }
         });
 
-        /*mSongList.add(new SongInformation("Song", "Interpret", "1e6kpeolD7NzTG5l6rsarL",2, 1));
-        mSongList.add(new SongInformation("Song", "Interpret", "4ebCcjMhmnjN2gTZ84rO8c",2, 1));
-        mSongList.add(new SongInformation("Song", "Interpret", "5SYHmSFd6XPK0dLYWML1vU",2, 1));
-        mSongList.add(new SongInformation("Song", "Interpret", "155l3GPsJHOSb77dtt0lV8",2, 1));
-        mSongList.add(new SongInformation("Song", "Interpret", "059sONalAfYqzIICi4Ti6R",2, 1));*/
-
-
-
-
     }
 
     void showSpotifyLoginDialog(){
@@ -141,15 +129,16 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         LayoutInflater inflater = this.getLayoutInflater();
         View popupLayout = inflater.inflate(R.layout.login_to_spotify_popup, null);
 
+        final PopupWindow loginPop = new PopupWindow(popupLayout, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+
         Button mLoginButton = popupLayout.findViewById(R.id.btAcceptLogin);
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 loginToSpotify();
+                loginPop.dismiss();
             }
         });
-
-        final PopupWindow loginPop = new PopupWindow(popupLayout, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 
         findViewById(R.id.clRoot).post(new Runnable() {
             @Override
@@ -158,27 +147,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             }
         });
 
-
-        /*AlertDialog.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
-        } else {
-            builder = new AlertDialog.Builder(this);
-        }
-        builder.setTitle("Mit Spotify Anmelden")
-                .setMessage("Um Lieder in die Gruppe posten zu können must du dich mit deinem Spotify Account Anmelden")
-                .setPositiveButton("Anmelden", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        loginToSpotify();
-                    }
-                })
-                .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .show();*/
     }
 
     void loginToSpotify(){
@@ -295,7 +263,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                 Log.e("accessToken", response.getAccessToken());
 
                 spotifyAccessToken = response.getAccessToken();
-                isLoggedIn = true;
 
                 setSpotifyPlayer();
 
@@ -303,6 +270,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString(ACCESS_TOKEN_NAME, spotifyAccessToken);
                 editor.apply();
+
+                loadSongs();
             }
         }
     }
