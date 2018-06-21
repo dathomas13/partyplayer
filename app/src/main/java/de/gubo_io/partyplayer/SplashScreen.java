@@ -1,7 +1,9 @@
 package de.gubo_io.partyplayer;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -29,7 +31,6 @@ public class SplashScreen extends AppCompatActivity {
             }
         });
         mJoinGroupButton = findViewById(R.id.btnJoinGroup);
-        textView = findViewById(R.id.resultText);
         final Activity activity = this;
         mJoinGroupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,8 +65,13 @@ public class SplashScreen extends AppCompatActivity {
                 Toast.makeText(this, "You cancelled the scanning", Toast.LENGTH_LONG).show();
             }
             else{
-                Toast.makeText(this, "You joined group xyz", Toast.LENGTH_LONG).show();
-                textView.setText(intentResult.getContents());
+                Toast.makeText(this, "You joined group "+intentResult.getContents(), Toast.LENGTH_LONG).show();
+                SharedPreferences sharedPreferences = getSharedPreferences("playerPref",Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt("groupId",Integer.parseInt(intentResult.getContents()));
+                editor.apply();
+                Intent intent = new Intent(SplashScreen.this, MainActivity.class);
+                startActivity(intent);
             }
         }
         else{
