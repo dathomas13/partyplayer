@@ -28,7 +28,6 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
-import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
@@ -52,10 +51,11 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private boolean isPlayer = true;
     private int groupId = 1;
 
-    private int currentSong = 0;
+    private int currentSong = -1;
 
     private TextView mCurrentSongNameView;
-    private  TextView mCurrentInterpretView;
+    private TextView mCurrentInterpretView;
+    private ToggleButton mPlayPauseButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             showSpotifyLoginDialog();
         }*/
 
-       if(isPlayer)
-           showSpotifyLoginDialog();
+        if (isPlayer)
+            showSpotifyLoginDialog();
 
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -89,18 +89,18 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mCurrentSongNameView = findViewById(R.id.tvCurrentSongName);
         mCurrentInterpretView = findViewById(R.id.tvCurrentInterpret);
 
-        final ToggleButton mPlayPauseButton = findViewById(R.id.tbPlayPause);
+        mPlayPauseButton = findViewById(R.id.tbPlayPause);
+
         if (!isPlayer)
             mPlayPauseButton.setVisibility(View.GONE);
+
         mPlayPauseButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked)
-                    if(mSongList!=null&&mSongList.size()>0) {
-                        playSong();
-                        Log.d("play song", mSongList.get(currentSong).getSpotifyId());
-                    }
-                    else
+                if (isChecked)
+                    if (mSongList != null && mSongList.size() > 0) {
+                        startPlaying();
+                    } else
                         mPlayPauseButton.setChecked(false);
                 else
                     pauseSong();
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     }
 
-    void showSpotifyLoginDialog(){
+    void showSpotifyLoginDialog() {
 
         LayoutInflater inflater = this.getLayoutInflater();
         View popupLayout = inflater.inflate(R.layout.login_to_spotify_popup, null);
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     }
 
-    void loginToSpotify(){
+    void loginToSpotify() {
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,
                 REDIRECT_URI);
@@ -159,9 +159,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
     }
 
-    void setSpotifyPlayer(){
+    void setSpotifyPlayer() {
         Log.e("accessToken", spotifyAccessToken);
-        if(mPlayer==null) {
+        if (mPlayer == null) {
             Config playerConfig = new Config(this, spotifyAccessToken, CLIENT_ID);
             Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
                 @Override
@@ -181,30 +181,18 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         }
     }
 
-    void loadSongs(){
+    void loadSongs() {
         NetworkUtils networkUtils = new NetworkUtils();
         networkUtils.setOnSongsReceivedListener(new NetworkUtils.OnSongsReceivedListener() {
             @Override
             public void onSongsReceived(List<SongInformation> songs) {
                 mSongList = songs;
                 mMusicListAdapter.setSongList(mSongList);
-                setCurrentSongInfo();
+                //setCurrentSongInfo();
             }
         });
         networkUtils.getSongs(groupId, getApplicationContext());
     }
-
-    private final Player.OperationCallback mOperationCallback = new Player.OperationCallback() {
-        @Override
-        public void onSuccess() {
-
-        }
-
-        @Override
-        public void onError(Error error) {
-            Log.e("Spotify Playback error", error.toString());
-        }
-    };
 
     void handleSharedText(Intent intent) {
         String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
@@ -230,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         }
     }
 
-    void showPostSongAlert(final SongInformation song){
+    void showPostSongAlert(final SongInformation song) {
         AlertDialog.Builder builder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
@@ -252,30 +240,32 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                 .show();
     }
 
-    void playSong(){
-        String currentTrackUri = "spotify:track:" + mSongList.get(currentSong).getSpotifyId();
+    void startPlaying() {
+        if(!(mSongList.size()>currentSong + 1))
+            currentSong = -1;
+
+        String currentTrackUri = "spotify:track:" + mSongList.get(currentSong + 1).getSpotifyId();
         mPlayer.playUri(null, currentTrackUri, 0, 0);
-
-        queueNextSong();
-
-        setCurrentSongInfo();
     }
 
-    void queueNextSong(){
-        if(mSongList.size() > currentSong+1){
-            String nextTrackUri = "spotify:track:" + mSongList.get(currentSong).getSpotifyId();
+    void queueNextSong() {
+        if (mSongList.size() > currentSong + 1) {
+            Log.d("queue", "next song");
+            String nextTrackUri = "spotify:track:" + mSongList.get(currentSong + 1).getSpotifyId();
             mPlayer.queue(null, nextTrackUri);
         }
     }
 
-    void setCurrentSongInfo(){
-        SongInformation currentSongInfo = mSongList.get(currentSong);
+    void setCurrentSongInfo() {
+        if (mSongList.size() > currentSong) {
+            SongInformation currentSongInfo = mSongList.get(currentSong);
 
-        mCurrentSongNameView.setText(currentSongInfo.getName());
-        mCurrentInterpretView.setText(currentSongInfo.getArtists());
+            mCurrentSongNameView.setText(currentSongInfo.getName());
+            mCurrentInterpretView.setText(currentSongInfo.getArtists());
+        }
     }
 
-    void pauseSong(){
+    void pauseSong() {
         mPlayer.pause(null);
     }
 
@@ -285,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
         if (requestCode == REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            switch (response.getType()){
+            switch (response.getType()) {
                 case TOKEN:
                     spotifyAccessToken = response.getAccessToken();
 
@@ -308,24 +298,24 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
-        Log.d("MainActivity", "Playback event received: " + playerEvent.name());
+        //Log.d("MainActivity", "Playback event received: " + playerEvent.name());
         switch (playerEvent) {
-            // Handle event type as necessary
-            case kSpPlaybackNotifyNext:
-                if (mSongList.size() > currentSong+1){
-                    currentSong++;
-                    queueNextSong();
-                    setCurrentSongInfo();
-                }
-                break;
-
             case kSpPlaybackNotifyTrackChanged:
                 Log.e("spotify", "track changed");
+
+                if (mSongList.size() > currentSong + 1) {
+                    currentSong++;
+                    setCurrentSongInfo();
+                    queueNextSong();
+                } else {
+                    mPlayPauseButton.setChecked(false);
+                }
                 break;
 
             default:
                 break;
         }
+
     }
 
     @Override
