@@ -259,9 +259,10 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
                 Log.e("accessToken", response.getAccessToken());
-                setSpotifyPlayer();
 
                 spotifyAccessToken = response.getAccessToken();
+
+                setSpotifyPlayer();
 
                 SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
