@@ -105,6 +105,18 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         final MusicListAdapter mMusicListAdapter = new MusicListAdapter(getApplicationContext(), mSongList);
         mSongListView.setAdapter(mMusicListAdapter);
 
+        NetworkUtils networkUtils = new NetworkUtils();
+        networkUtils.setOnSongsReceivedListener(new NetworkUtils.OnSongsReceivedListener() {
+            @Override
+            public void onSongsReceived(List<SongInformation> songs) {
+                mSongList = songs;
+                mMusicListAdapter.setSongList(mSongList);
+                setCurrentSongInfo();
+            }
+        });
+        networkUtils.getSongs(groupId, getApplicationContext());
+
+
         FloatingActionButton fab = findViewById(R.id.fabAdd);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                     public void onSongsReceived(List<SongInformation> songs) {
                         mSongList = songs;
                         mMusicListAdapter.setSongList(mSongList);
+                        setCurrentSongInfo();
                     }
                 });
                 networkUtils.getSongs(groupId, getApplicationContext());
