@@ -3,6 +3,7 @@ package de.gubo_io.partyplayer;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -38,48 +39,30 @@ public class ActivityDataSource extends AsyncTask<String, Void, String> {
     }
     @Override
     protected String doInBackground(String... params) {
+        Log.e("ADS", "doInBG");
 
-        try {
-            openConnection();
-            String result = readResult();
-            bitmap = TextToImageEncode(result);
+            String result;
+        NetworkUtils networkUtils = new NetworkUtils();
+        networkUtils.setOnGroupIdRecievedListener(new NetworkUtils.OnGroupIdRecievedListener() {
+            @Override
+            public void onGroupIdRecieved(int groupId) {
+                try {
+                    Log.e("ADS", ""+groupId);
+                    bitmap = TextToImageEncode(groupId + "");
+                }
+                catch (WriterException w){
+                    w.getMessage();
+                }
+            }
+        });
+        networkUtils.createGroup(this.context);
 
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (WriterException w){
-            w.getMessage();
-        }
 
-        return null;
+            return "";
+
+
     }
-    /**
-     * Öffnet eine Verbindung {@link URLConnection}.
-     * @throws IOException
-     */
-    private void openConnection() throws IOException{
-//StringBuffer für das zusammensetzen der URL
-        StringBuffer dataBuffer = new StringBuffer();
-        dataBuffer.append(URLEncoder.encode("authkey", "UTF-8"));
-        dataBuffer.append(POST_PARAM_KEYVALUE_SEPARATOR);
-        dataBuffer.append(URLEncoder.encode(AUTHKEY, "UTF-8"));
-        dataBuffer.append(POST_PARAM_SEPARATOR);
-        dataBuffer.append(URLEncoder.encode("method", "UTF-8"));
-        dataBuffer.append(POST_PARAM_KEYVALUE_SEPARATOR);
-        dataBuffer.append(URLEncoder.encode(DESTINATION_METHOD, "UTF-8"));
-//Adresse der PHP Schnittstelle für die Verbindung zur MySQL Datenbank
-        URL url = new URL("http://gubo-io.de/partyplayer/create_group.php");
-        conn = url.openConnection();
-        conn.setDoOutput(true);
-        OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-        wr.write(dataBuffer.toString());
-        wr.flush();
-    }
-    /**
-     * Ließt das Ergebnis aus der geöffneten Verbindung.
-     * @return liefert ein String mit dem gelesenen Werten.
-     * @throws IOException
-     */
+
     private String readResult()throws IOException{
         String result = null;
 //Lesen der Rückgabewerte vom Server

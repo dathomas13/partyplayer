@@ -34,6 +34,41 @@ public class NetworkUtils {
 
     static int errorCounter = 0;
 
+    interface OnGroupIdRecievedListener{
+       public void onGroupIdRecieved(int groupId);
+    }
+    private OnGroupIdRecievedListener onGroupIdRecievedListener;
+    public void setOnGroupIdRecievedListener(OnGroupIdRecievedListener listener){
+        this.onGroupIdRecievedListener = listener;
+    }
+    public void createGroup(Context context){
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = "http://gubo-io.de/partyplayer/create_group.php";
+        JsonObjectRequest  jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            int groupId = response.getInt("groupId");
+                            Log.e("g", ""+groupId);
+                            onGroupIdRecievedListener.onGroupIdRecieved(groupId);
+                        } catch (Exception e) {
+                            e.getCause();
+                        }
+                    }
+                }, new Response.ErrorListener(){
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("parsed", ""+error.networkResponse.headers.values().toString());
+                        Log.e("err", ""+error.getMessage());
+                    }
+                }) {
+
+                };
+
+        queue.add(jsonObjectRequest);
+    }
+
     public interface OnMetaReceivedListener{
         public void onMetaReceived(SongInformation mSongInfo);
     }

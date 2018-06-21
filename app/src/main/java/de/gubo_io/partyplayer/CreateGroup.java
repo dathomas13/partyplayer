@@ -16,11 +16,15 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
+import static de.gubo_io.partyplayer.ActivityDataSource.QRcodeWidth;
+
+
 public class CreateGroup extends AppCompatActivity {
 
     ImageView imageView;
     Button button;
     String EditTextValue ;
+    Bitmap bitmap ;
     Thread thread ;
     Context context = this;
 
@@ -36,9 +40,22 @@ public class CreateGroup extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new ActivityDataSource(textView, imageView, context).execute("Hello");
-
-
+                //new ActivityDataSource(textView, imageView, context).execute();
+                NetworkUtils networkUtils = new NetworkUtils();
+                networkUtils.setOnGroupIdRecievedListener(new NetworkUtils.OnGroupIdRecievedListener() {
+                    @Override
+                    public void onGroupIdRecieved(int groupId) {
+                        try {
+                            Log.e("ADS", ""+groupId);
+                            bitmap = TextToImageEncode(groupId + "");
+                        }
+                        catch (WriterException w){
+                            w.getMessage();
+                        }
+                    }
+                });
+                Log.e("adss", "asdf");
+                networkUtils.createGroup(CreateGroup.this);
 
                 EditTextValue = textView.getText().toString();
 
@@ -46,5 +63,38 @@ public class CreateGroup extends AppCompatActivity {
 
             }
         });
+    }
+    Bitmap TextToImageEncode(String Value) throws com.google.zxing.WriterException {
+        BitMatrix bitMatrix;
+        try {
+            bitMatrix = new MultiFormatWriter().encode(
+                    Value,
+                    BarcodeFormat.DATA_MATRIX.QR_CODE,
+                    QRcodeWidth, QRcodeWidth, null
+            );
+
+        } catch (IllegalArgumentException Illegalargumentexception) {
+
+            return null;
+        }
+        int bitMatrixWidth = bitMatrix.getWidth();
+
+        int bitMatrixHeight = bitMatrix.getHeight();
+
+        int[] pixels = new int[bitMatrixWidth * bitMatrixHeight];
+
+        for (int y = 0; y < bitMatrixHeight; y++) {
+            int offset = y * bitMatrixWidth;
+
+            for (int x = 0; x < bitMatrixWidth; x++) {
+
+                pixels[offset + x] = bitMatrix.get(x, y) ?
+                        context.getResources().getColor(R.color.QRCodeBlackColor):context.getResources().getColor(R.color.QRCodeWhiteColor);
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_4444);
+
+        bitmap.setPixels(pixels, 0, 500, 0, 0, bitMatrixWidth, bitMatrixHeight);
+        return bitmap;
     }
    }
