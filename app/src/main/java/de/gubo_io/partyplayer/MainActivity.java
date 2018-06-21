@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked)
                     if(mSongList!=null&&mSongList.size()>0) {
-                        playSong("spotify:track:" + mSongList.get(currentSong).getSpotifyId());
+                        playSong();
                         Log.d("play song", mSongList.get(currentSong).getSpotifyId());
                     }
                     else
@@ -161,20 +161,24 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     void setSpotifyPlayer(){
         Log.e("accessToken", spotifyAccessToken);
-        Config playerConfig = new Config(this, spotifyAccessToken, CLIENT_ID);
-        Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
-            @Override
-            public void onInitialized(SpotifyPlayer spotifyPlayer) {
-                mPlayer = spotifyPlayer;
-                mPlayer.addConnectionStateCallback(MainActivity.this);
-                mPlayer.addNotificationCallback(MainActivity.this);
-            }
+        if(mPlayer==null) {
+            Config playerConfig = new Config(this, spotifyAccessToken, CLIENT_ID);
+            Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
+                @Override
+                public void onInitialized(SpotifyPlayer spotifyPlayer) {
+                    mPlayer = spotifyPlayer;
+                    mPlayer.addConnectionStateCallback(MainActivity.this);
+                    mPlayer.addNotificationCallback(MainActivity.this);
+                }
 
-            @Override
-            public void onError(Throwable throwable) {
-                Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
-            }
-        });
+                @Override
+                public void onError(Throwable throwable) {
+                    Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
+                }
+            });
+        } else {
+            mPlayer.login(spotifyAccessToken);
+        }
     }
 
     void loadSongs(){
@@ -189,6 +193,18 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         });
         networkUtils.getSongs(groupId, getApplicationContext());
     }
+
+    private final Player.OperationCallback mOperationCallback = new Player.OperationCallback() {
+        @Override
+        public void onSuccess() {
+
+        }
+
+        @Override
+        public void onError(Error error) {
+            Log.e("Spotify Playback error", error.toString());
+        }
+    };
 
     void handleSharedText(Intent intent) {
         String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
@@ -236,10 +252,20 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                 .show();
     }
 
-    void playSong(String url){
-        mPlayer.playUri(null, url, 0, 0);
+    void playSong(){
+        String currentTrackUri = "spotify:track:" + mSongList.get(currentSong).getSpotifyId();
+        mPlayer.playUri(null, currentTrackUri, 0, 0);
+
+        queueNextSong();
 
         setCurrentSongInfo();
+    }
+
+    void queueNextSong(){
+        if(mSongList.size() > currentSong+1){
+            String nextTrackUri = "spotify:track:" + mSongList.get(currentSong).getSpotifyId();
+            mPlayer.queue(null, nextTrackUri);
+        }
     }
 
     void setCurrentSongInfo(){
@@ -259,19 +285,23 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
         if (requestCode == REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                Log.e("accessToken", response.getAccessToken());
+            switch (response.getType()){
+                case TOKEN:
+                    spotifyAccessToken = response.getAccessToken();
 
-                spotifyAccessToken = response.getAccessToken();
+                    setSpotifyPlayer();
 
-                setSpotifyPlayer();
+                    SharedPreferences prefs = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString(ACCESS_TOKEN_NAME, spotifyAccessToken);
+                    editor.apply();
 
-                SharedPreferences prefs = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString(ACCESS_TOKEN_NAME, spotifyAccessToken);
-                editor.apply();
+                    loadSongs();
+                    break;
 
-                loadSongs();
+                case ERROR:
+                    Log.e("spotify login error", response.getError());
+
             }
         }
     }
@@ -282,8 +312,16 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         switch (playerEvent) {
             // Handle event type as necessary
             case kSpPlaybackNotifyNext:
-                currentSong++;
-                playSong(mSongList.get(currentSong).getSpotifyId());
+                if (mSongList.size() > currentSong+1){
+                    currentSong++;
+                    queueNextSong();
+                    setCurrentSongInfo();
+                }
+                break;
+
+            case kSpPlaybackNotifyTrackChanged:
+                Log.e("spotify", "track changed");
+                break;
 
             default:
                 break;
@@ -323,5 +361,11 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     @Override
     public void onConnectionMessage(String message) {
         Log.d("MainActivity", "Received connection message: " + message);
+    }
+
+    @Override
+    protected void onDestroy() {
+        Spotify.destroyPlayer(this);
+        super.onDestroy();
     }
 }
