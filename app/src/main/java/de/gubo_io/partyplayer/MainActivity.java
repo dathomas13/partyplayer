@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_v2);
 
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        final SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         spotifyAccessToken = sharedPref.getString(ACCESS_TOKEN_NAME, "");
 
 
@@ -135,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                     }
                 });
                 networkUtils.getSongs(groupId, getApplicationContext());
+
 
             }
         });
