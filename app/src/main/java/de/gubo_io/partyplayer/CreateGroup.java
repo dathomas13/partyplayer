@@ -19,7 +19,6 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
-import static de.gubo_io.partyplayer.ActivityDataSource.QRcodeWidth;
 
 
 public class CreateGroup extends AppCompatActivity {
@@ -29,6 +28,7 @@ public class CreateGroup extends AppCompatActivity {
     Button btnEnterGroup;
     Bitmap bitmap ;
     Context context = this;
+    public final static int QRcodeWidth = 500 ;
     int groupId;
 
     @Override

@@ -58,27 +58,7 @@ public class NetworkUtils {
                         Log.e("Volley",""+error.getMessage());
                     }
                 });
-       /* JsonObjectRequest  jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            int groupId = response.getInt("groupId");
-                            Log.e("g", ""+groupId);
-                            onGroupIdRecievedListener.onGroupIdRecieved(groupId);
-                        } catch (Exception e) {
-                            e.getCause();
-                        }
-                    }
-                }, new Response.ErrorListener(){
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("parsed", ""+error.networkResponse.headers.values().toString());
-                        Log.e("err", ""+error.getMessage());
-                    }
-                }) {
 
-                };*/
         queue.add(stringRequest);
     }
 

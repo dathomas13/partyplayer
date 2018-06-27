@@ -19,7 +19,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:text="Um eine Gruppe erstellen zu können musst du dich mit deinem Spotify Premium Account anmelden!"
+                android:text="Um zum Player zu gelangen, musst du dich mit deinem Spotify Premium Account anmelden!"
                 android:textSize="16sp"/>
 
             <Button
