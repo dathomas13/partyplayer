@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
-        //Log.d("MainActivity", "Playback event received: " + playerEvent.name());
+        Log.d("MainActivity", "Playback event received: " + playerEvent.name());
         switch (playerEvent) {
             case kSpPlaybackNotifyTrackChanged:
                 Log.e("spotify", "track changed");
