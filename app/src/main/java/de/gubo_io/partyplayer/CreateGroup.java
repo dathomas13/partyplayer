@@ -102,7 +102,7 @@ public class CreateGroup extends AppCompatActivity {
             for (int x = 0; x < bitMatrixWidth; x++) {
 
                 pixels[offset + x] = bitMatrix.get(x, y) ?
-                        context.getResources().getColor(R.color.QRCodeBlackColor):context.getResources().getColor(R.color.QRCodeWhiteColor);
+                        ContextCompat.getColor(context, R.color.QRCodeBlackColor):ContextCompat.getColor(context, R.color.QRCodeWhiteColor);
             }
         }
         Bitmap bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_4444);
