@@ -213,7 +213,7 @@ public class NetworkUtils {
     }
 
     public interface OnSongsReceivedListener{
-        void onSongsReceived(List<SongInformation> songs);
+        void onSongsReceived(List<SongInformation> songs, SongInformation currentSong);
     }
 
     private OnSongsReceivedListener onSongsReceivedListener;
@@ -248,6 +248,7 @@ public class NetworkUtils {
 
 
                             List<SongInformation> mSongList = new ArrayList<>();
+                            SongInformation currentSong= new SongInformation();
                             for (int i = 0; i < response.length(); i++){
                                 SongInformation songInformation = new SongInformation();
                                 JSONObject song = response.getJSONObject(i);
@@ -260,6 +261,8 @@ public class NetworkUtils {
                                 songInformation.setGroupId(groupId);
                                 if(songInformation.getIsCurrentSong()==0)
                                     mSongList.add(songInformation);
+                                else
+                                    currentSong = songInformation;
                             }
                             Collections.sort(mSongList, new Comparator<SongInformation>() {
                                 @Override
@@ -271,7 +274,7 @@ public class NetworkUtils {
                                 }
                             });
 
-                            onSongsReceivedListener.onSongsReceived(mSongList);
+                            onSongsReceivedListener.onSongsReceived(mSongList,currentSong);
 
                             Log.d("status", status);
 
