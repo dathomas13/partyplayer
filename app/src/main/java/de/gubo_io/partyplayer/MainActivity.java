@@ -61,7 +61,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     final MusicListAdapter mMusicListAdapter = new MusicListAdapter();
     private int groupId = 1;
 
-    private int currentSong = 0;
+    //private int currentSong = 0;
+    private SongInformation currentSongInfo;
 
     private BroadcastReceiver mNetworkStateReceiver;
 
@@ -346,24 +347,19 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     }
 
     void playCurrentSong() {
-        String currentTrackUri = "spotify:track:" + mSongList.get(currentSong).getSpotifyId();
+        String currentTrackUri = "spotify:track:" + mSongList.get(0).getSpotifyId();
         mPlayer.playUri(null, currentTrackUri, 0, 0);
 
         setCurrentSongInfo();
 
-        NetworkUtils.updateCurrentSong(mSongList.get(currentSong), groupId, getApplicationContext());
+        NetworkUtils.updateCurrentSong(mSongList.get(0), groupId, getApplicationContext());
     }
 
     void setCurrentSongInfo() {
-        if (mSongList.size() > currentSong) {
-            SongInformation currentSongInfo = mSongList.get(currentSong);
 
-            mCurrentSongNameView.setText(currentSongInfo.getName());
-            mCurrentInterpretView.setText(currentSongInfo.getArtists());
+        mCurrentSongNameView.setText(currentSongInfo.getName());
+        mCurrentInterpretView.setText(currentSongInfo.getArtists());
 
-            mMusicListAdapter.setCurrentSongIndex(currentSong);
-            mMusicListAdapter.notifyDataSetChanged();
-        }
     }
 
     void pauseSong() {
@@ -384,16 +380,12 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             case kSpPlaybackNotifyAudioDeliveryDone:
                 Log.e("spotify", "track ended");
 
-                if (mSongList.size() > currentSong + 1) {
+                if (mSongList.size() > 0) {
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if (!(mSongList.size() > currentSong + 1))
-                                currentSong = 0;
-
-                            currentSong++;
-
+                            //todo: remove old Song from Database
                             playCurrentSong();
                         }
                     }, 2000);
