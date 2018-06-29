@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private boolean isPlayer = true;
     private int groupId = 1;
 
-    private int currentSong = -1;
+    private int currentSong = 0;
 
     private BroadcastReceiver mNetworkStateReceiver;
 
@@ -364,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                         @Override
                         public void run() {
                             if(!(mSongList.size()>currentSong + 1))
-                                currentSong = -1;
+                                currentSong = 0;
 
                             currentSong++;
 
