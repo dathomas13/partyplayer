@@ -12,6 +12,7 @@
         android:id="@+id/ivSongCover"
         android:layout_width="80dp"
         android:layout_height="80dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,7 +28,9 @@
         android:text="Name"
         android:textColor="@color/colorTextLevel0"
         android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@+id/tvIndex"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/ivSongCover"
         app:layout_constraintTop_toTopOf="@+id/ivSongCover" />
 
@@ -41,22 +44,11 @@
         android:text="Interpret"
         android:textColor="@color/colorTextLevel1"
         android:textSize="18sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/ivSongCover"
         app:layout_constraintTop_toBottomOf="@+id/tvSongName" />
-
-    <TextView
-        android:id="@+id/tvIndex"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:text="#1"
-        android:textColor="@color/colorTextLevel1"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/ivSongCover" />
 
     <Button
         android:id="@+id/btVoteDown"

@@ -16,6 +16,7 @@ import java.util.List;
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.MusicItemViewHolder> {
     private Context context;
     private List<SongInformation> mSongList = new ArrayList<>();
+    private int currentSongIndex = 0;
 
     void setContext(Context context){
         this.context = context;
@@ -24,6 +25,10 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
     void setSongList(List<SongInformation> songList){
         mSongList = songList;
         notifyDataSetChanged();
+    }
+
+    void setCurrentSongIndex(int currentSongIndex){
+        this.currentSongIndex = currentSongIndex;
     }
 
 
@@ -48,7 +53,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
         ImageView mSongCover;
         TextView mSongName;
         TextView mInterpret;
-        TextView mIndex;
         Button mVoteUpButton;
         Button mVoteDownButton;
 
@@ -58,7 +62,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
             mSongCover = itemView.findViewById(R.id.ivSongCover);
             mSongName = itemView.findViewById(R.id.tvSongName);
             mInterpret = itemView.findViewById(R.id.tvInterpret);
-            mIndex = itemView.findViewById(R.id.tvIndex);
             mVoteUpButton = itemView.findViewById(R.id.btVoteUp);
             mVoteDownButton = itemView.findViewById(R.id.btVoteDown);
         }
@@ -68,8 +71,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
 
             mSongName.setText(currentSong.getName());
             mInterpret.setText(currentSong.getArtists());
-
-            mIndex.setText("#" + listIndex);
 
             mVoteUpButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -84,6 +85,11 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
 
                 }
             });
+
+            if(listIndex==currentSongIndex)
+                mSongName.setTextColor(context.getResources().getColor(R.color.colorAccent));
+            else
+                mSongName.setTextColor(context.getResources().getColor(R.color.colorTextLevel0));
         }
 
     }

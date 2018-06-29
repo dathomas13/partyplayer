@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -72,13 +74,16 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         setContentView(R.layout.activity_main_v2);
 
         SharedPreferences sharedPref = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
-        spotifyAccessToken = sharedPref.getString(ACCESS_TOKEN_NAME, "");
         groupId = sharedPref.getInt("groupId", -1);
 
 
-        if (isPlayer)
-            showSpotifyLoginDialog();
-
+        if (isPlayer) {
+            spotifyAccessToken = sharedPref.getString(ACCESS_TOKEN_NAME, "");
+            if(spotifyAccessToken.equals(""))
+                showSpotifyLoginDialog();
+            else
+                setSpotifyPlayer();
+        }
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -101,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked)
                     if (mSongList != null && mSongList.size() > 0) {
-                        startPlaying();
+                        playCurrentSong();
                     } else
                         mPlayPauseButton.setChecked(false);
                 else
@@ -201,10 +206,10 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                     editor.putString(ACCESS_TOKEN_NAME, spotifyAccessToken);
                     editor.apply();
 
-                    loadSongs();
                     break;
 
                 case ERROR:
+                    showLoginFailedAlert();
                     Log.e("spotify login error", response.getError());
 
             }
@@ -218,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             mPlayer = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
                 @Override
                 public void onInitialized(SpotifyPlayer spotifyPlayer) {
+                    mPlayer = spotifyPlayer;
                     mPlayer.setConnectivityStatus(mOperationCallback, getNetworkConnectivity(MainActivity.this));
                     mPlayer.addConnectionStateCallback(MainActivity.this);
                     mPlayer.addNotificationCallback(MainActivity.this);
@@ -292,20 +298,34 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                 .show();
     }
 
-    void startPlaying() {
-        if(!(mSongList.size()>currentSong + 1))
-            currentSong = -1;
-
-        String currentTrackUri = "spotify:track:" + mSongList.get(currentSong + 1).getSpotifyId();
-        mPlayer.playUri(null, currentTrackUri, 0, 0);
+    void showLoginFailedAlert() {
+        AlertDialog.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+        } else {
+            builder = new AlertDialog.Builder(this);
+        }
+        builder.setTitle("Anmeldung fehlgeschlagen!")
+                .setMessage("Erneut probieren?")
+                .setPositiveButton("Ja", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        loginToSpotify();
+                    }
+                })
+                .setNegativeButton("Nein", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
     }
 
-    void queueNextSong() {
-        if (mSongList.size() > currentSong + 1) {
-            Log.i("queue", "next song");
-            String nextTrackUri = "spotify:track:" + mSongList.get(currentSong + 1).getSpotifyId();
-            mPlayer.queue(null, nextTrackUri);
-        }
+    void playCurrentSong() {
+        String currentTrackUri = "spotify:track:" + mSongList.get(currentSong).getSpotifyId();
+        mPlayer.playUri(null, currentTrackUri, 0, 0);
+
+        setCurrentSongInfo();
     }
 
     void setCurrentSongInfo() {
@@ -314,6 +334,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
             mCurrentSongNameView.setText(currentSongInfo.getName());
             mCurrentInterpretView.setText(currentSongInfo.getArtists());
+
+            mMusicListAdapter.setCurrentSongIndex(currentSong);
+            mMusicListAdapter.notifyDataSetChanged();
         }
     }
 
@@ -321,21 +344,43 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mPlayer.pause(null);
     }
 
+
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
         Log.d("MainActivity", "Playback event received: " + playerEvent.name());
         switch (playerEvent) {
             case kSpPlaybackNotifyTrackChanged:
+
                 Log.e("spotify", "track changed");
 
-                if (mSongList.size() > currentSong + 1) {
-                    currentSong++;
-                    setCurrentSongInfo();
-                    queueNextSong();
+                break;
+
+            case kSpPlaybackNotifyAudioDeliveryDone:
+                Log.e("spotify", "track ended");
+
+                if (mSongList.size() > currentSong + 1){
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(!(mSongList.size()>currentSong + 1))
+                                currentSong = -1;
+
+                            currentSong++;
+
+                            playCurrentSong();
+                        }
+                    }, 2000);
                 } else {
                     mPlayPauseButton.setChecked(false);
                 }
                 break;
+
+            case kSpPlaybackNotifyBecameInactive:
+                Log.e("spotify", "became inactive");
+
+                break;
+
 
             default:
                 break;
@@ -359,6 +404,13 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     @Override
     public void onLoggedIn() {
         Log.d("MainActivity", "User logged in");
+        Toast toast = Toast.makeText(getApplicationContext(), "Login war erfolgreich!", Toast.LENGTH_SHORT);
+        toast.show();
+
+        if(mPlayer!=null)
+            mPlayPauseButton.setClickable(true);
+
+        loadSongs();
     }
 
     @Override
@@ -369,6 +421,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     @Override
     public void onLoginFailed(Error error) {
         Log.e("login error", error.toString());
+
+        showLoginFailedAlert();
     }
 
     @Override
