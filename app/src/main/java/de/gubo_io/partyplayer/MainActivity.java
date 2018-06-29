@@ -61,7 +61,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     final MusicListAdapter mMusicListAdapter = new MusicListAdapter();
     private int groupId = 1;
 
-    private int currentSong = 0;
+    //private int currentSong = 0;
+    private SongInformation currentSong;
 
     private BroadcastReceiver mNetworkStateReceiver;
 
@@ -123,20 +124,22 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Creating the instance of PopupMenu
                 PopupMenu popup = new PopupMenu(MainActivity.this, mMenuButton);
-                //Inflating the Popup using xml file
+
                 popup.getMenuInflater()
                         .inflate(R.menu.main_menu, popup.getMenu());
 
-                //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
-                        Toast.makeText(
-                                MainActivity.this,
-                                "You Clicked : " + item.getTitle(),
-                                Toast.LENGTH_SHORT
-                        ).show();
+                        switch (item.getItemId()){
+                            case R.id.mAddUser:
+                                Intent intent = new Intent(MainActivity.this, CreateGroup.class);
+                                startActivity(intent);
+                                break;
+                            case R.id.mLogout:
+
+                                break;
+                        }
                         return true;
                     }
                 });
@@ -269,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             @Override
             public void onSongsReceived(List<SongInformation> songs, SongInformation currentSong) {
                 mSongList = songs;
+                MainActivity.this.currentSong = currentSong;
                 mMusicListAdapter.setSongList(mSongList);
                 setCurrentSongInfo();
             }
@@ -346,24 +350,17 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     }
 
     void playCurrentSong() {
-        String currentTrackUri = "spotify:track:" + mSongList.get(currentSong).getSpotifyId();
+        String currentTrackUri = "spotify:track:" + currentSong.getSpotifyId();
         mPlayer.playUri(null, currentTrackUri, 0, 0);
 
         setCurrentSongInfo();
-
-        NetworkUtils.updateCurrentSong(mSongList.get(currentSong), groupId, getApplicationContext());
     }
 
     void setCurrentSongInfo() {
-        if (mSongList.size() > currentSong) {
-            SongInformation currentSongInfo = mSongList.get(currentSong);
 
-            mCurrentSongNameView.setText(currentSongInfo.getName());
-            mCurrentInterpretView.setText(currentSongInfo.getArtists());
+        mCurrentSongNameView.setText(currentSong.getName());
+        mCurrentInterpretView.setText(currentSong.getArtists());
 
-            mMusicListAdapter.setCurrentSongIndex(currentSong);
-            mMusicListAdapter.notifyDataSetChanged();
-        }
     }
 
     void pauseSong() {
@@ -384,16 +381,16 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             case kSpPlaybackNotifyAudioDeliveryDone:
                 Log.e("spotify", "track ended");
 
-                if (mSongList.size() > currentSong + 1) {
+                if (mSongList.size() > 0) {
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if (!(mSongList.size() > currentSong + 1))
-                                currentSong = 0;
-
-                            currentSong++;
-
+                            NetworkUtils.removeSong(currentSong, groupId, getApplicationContext());
+                            NetworkUtils.updateCurrentSong(mSongList.get(0), groupId, getApplicationContext());
+                            currentSong = mSongList.get(0);
+                            mSongList.remove(0);
+                            mMusicListAdapter.notifyDataSetChanged();
                             playCurrentSong();
                         }
                     }, 2000);
