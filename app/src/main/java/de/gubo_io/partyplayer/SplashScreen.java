@@ -25,6 +25,10 @@ public class SplashScreen extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
         final EditText editText = findViewById(R.id.txtGroupId);
         editText.setText("1");
+        SharedPreferences sharedPreferences = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("groupId", -1);
+        editor.apply();
 
         final SharedPreferences sharedPref = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
         int groupId = sharedPref.getInt("groupId", -1);
