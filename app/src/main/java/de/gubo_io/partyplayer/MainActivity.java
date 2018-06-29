@@ -267,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         NetworkUtils networkUtils = new NetworkUtils();
         networkUtils.setOnSongsReceivedListener(new NetworkUtils.OnSongsReceivedListener() {
             @Override
-            public void onSongsReceived(List<SongInformation> songs) {
+            public void onSongsReceived(List<SongInformation> songs, SongInformation currentSong) {
                 mSongList = songs;
                 mMusicListAdapter.setSongList(mSongList);
                 setCurrentSongInfo();
