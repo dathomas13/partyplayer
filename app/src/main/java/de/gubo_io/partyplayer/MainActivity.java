@@ -350,6 +350,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mPlayer.playUri(null, currentTrackUri, 0, 0);
 
         setCurrentSongInfo();
+
+        NetworkUtils.updateCurrentSong(mSongList.get(currentSong), groupId, getApplicationContext());
     }
 
     void setCurrentSongInfo() {
