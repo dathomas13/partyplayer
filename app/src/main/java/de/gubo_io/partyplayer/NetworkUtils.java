@@ -256,8 +256,10 @@ public class NetworkUtils {
                                 songInformation.setSpotifyId(song.getString("spotifyId"));
                                 songInformation.setUpVotes(song.getInt("upVotes"));
                                 songInformation.setDownVotes(song.getInt("downVotes"));
+                                songInformation.setIsCurrentSong(song.getInt("isCurrentSong"));
                                 songInformation.setGroupId(groupId);
-                                mSongList.add(songInformation);
+                                if(songInformation.getIsCurrentSong()==0)
+                                    mSongList.add(songInformation);
                             }
                             Collections.sort(mSongList, new Comparator<SongInformation>() {
                                 @Override
