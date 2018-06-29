@@ -36,9 +36,11 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="Interpret"
+        android:text="Name"
         android:textColor="#ffffff"
         android:textSize="18sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/ivCurrentCover"
         app:layout_constraintTop_toBottomOf="@+id/tvInfo" />
@@ -52,6 +54,8 @@
         android:text="Interpret"
         android:textColor="#dedede"
         android:textSize="18sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintEnd_toStartOf="@+id/tbPlayPause"
         app:layout_constraintStart_toEndOf="@+id/ivCurrentCover"
         app:layout_constraintTop_toBottomOf="@+id/tvCurrentSongName" />
@@ -67,6 +71,7 @@
         android:checked="false"
         android:textOff=""
         android:textOn=""
+        android:clickable="false"
         app:layout_constraintBottom_toTopOf="@+id/cvContent"
         app:layout_constraintEnd_toEndOf="parent" />
 

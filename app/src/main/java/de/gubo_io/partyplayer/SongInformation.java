@@ -1,9 +1,13 @@
 package de.gubo_io.partyplayer;
 
+import android.graphics.Bitmap;
+
 public class SongInformation {
     private String name;
     private String artists;
     private String spotifyId;
+    private String coverUrl;
+    private Bitmap cover;
     private int upVotes;
     private int downVotes;
 
@@ -62,4 +66,22 @@ public class SongInformation {
     public void setDownVotes(int downVotes) {
         this.downVotes = downVotes;
     }
+
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
+    }
+
+    public Bitmap getCover() {
+        return cover;
+    }
+
+    public void setCover(Bitmap cover) {
+        this.cover = cover;
+    }
+
+
 }

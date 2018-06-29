@@ -18,6 +18,7 @@ import java.util.List;
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.MusicItemViewHolder> {
     private Context context;
     private List<SongInformation> mSongList = new ArrayList<>();
+    private int currentSongIndex = 0;
 
     void setContext(Context context){
         this.context = context;
@@ -26,6 +27,10 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
     void setSongList(List<SongInformation> songList){
         mSongList = songList;
         notifyDataSetChanged();
+    }
+
+    void setCurrentSongIndex(int currentSongIndex){
+        this.currentSongIndex = currentSongIndex;
     }
 
 
@@ -110,6 +115,11 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
                     return false;
                 }
             });
+
+            if(listIndex==currentSongIndex)
+                mSongName.setTextColor(context.getResources().getColor(R.color.colorAccent));
+            else
+                mSongName.setTextColor(context.getResources().getColor(R.color.colorTextLevel0));
         }
 
     }

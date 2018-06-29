@@ -110,9 +110,13 @@ public class NetworkUtils {
                                 artistsStr += artist.getString("name");
                             }
 
+                            String coverUrl = "";
+                            JSONArray images = albumInfo.getJSONArray("images");
+                            if (images.length()==3){
+                                coverUrl = images.getJSONObject(1).getString("url");
+                            }
                             SongInformation mSongInfo = new SongInformation(name, artistsStr, spotifyId);
-
-                            Log.d("song name", mSongInfo.getName());
+                            mSongInfo.setCoverUrl(coverUrl);
 
                             onMetaReceivedListener.onMetaReceived(mSongInfo);
 
@@ -173,6 +177,7 @@ public class NetworkUtils {
         postParam.put("spotifyId", song.getSpotifyId());
         postParam.put("name", song.getName());
         postParam.put("artists", song.getArtists());
+        postParam.put("coverUrl", song.getCoverUrl());
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.POST, url, new JSONObject(postParam), new Response.Listener<JSONObject>() {
