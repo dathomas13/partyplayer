@@ -24,56 +24,72 @@ import com.google.zxing.common.BitMatrix;
 public class CreateGroup extends AppCompatActivity {
 
     ImageView imageView;
-    Button btnCreateGroup;
     Button btnEnterGroup;
     Bitmap bitmap ;
     Context context = this;
     public final static int QRcodeWidth = 500 ;
     int groupId;
+    boolean fromMain=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_group);
 
+
         imageView = findViewById(R.id.image);
-        btnCreateGroup = findViewById(R.id.btnGenerateQR);
         btnEnterGroup = findViewById(R.id.btnEnterGroup);
         final TextView textView = findViewById(R.id.textView);
-
-        btnCreateGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NetworkUtils networkUtils = new NetworkUtils();
-                networkUtils.setOnGroupIdRecievedListener(new NetworkUtils.OnGroupIdRecievedListener() {
-                    @Override
-                    public void onGroupIdRecieved(int _groupId) {
-                        try {
-                            CreateGroup.this.groupId = _groupId;
-                            SharedPreferences sharedPreferences = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putInt("groupId", groupId);
-                            editor.apply();
-                            bitmap = TextToImageEncode(groupId + "");
-
-                            imageView.setImageBitmap(bitmap);
-                            btnEnterGroup.setVisibility(View.VISIBLE);
-                        }
-                        catch (WriterException w){
-                            w.getMessage();
-                        }
-                    }
-                });
-                networkUtils.createGroup(CreateGroup.this);
-
+        SharedPreferences sharedPref = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
+        groupId =  sharedPref.getInt("groupId", -1);
+        if(groupId != -1){
+            try {
+                fromMain = true;
+                btnEnterGroup.setVisibility(View.VISIBLE);
+                btnEnterGroup.setText("Zurück zum Player");
+                bitmap = TextToImageEncode(groupId + "");
+                imageView.setImageBitmap(bitmap);
             }
-        });
+            catch (WriterException w){
+                Log.e("QR-Code", ""+ w.getMessage());
+            }
+        }
+
+        else {
+            NetworkUtils networkUtils = new NetworkUtils();
+            networkUtils.setOnGroupIdRecievedListener(new NetworkUtils.OnGroupIdRecievedListener() {
+                @Override
+                public void onGroupIdRecieved(int _groupId) {
+                    try {
+                        CreateGroup.this.groupId = _groupId;
+                        SharedPreferences sharedPreferences = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putInt("groupId", groupId);
+                        editor.apply();
+                        bitmap = TextToImageEncode(groupId + "");
+
+                        imageView.setImageBitmap(bitmap);
+                        btnEnterGroup.setVisibility(View.VISIBLE);
+                        btnEnterGroup.setText("Der Gruppe beitreten");
+                    }
+                    catch (WriterException w){
+                        w.getMessage();
+                    }
+                }
+            });
+            networkUtils.createGroup(CreateGroup.this);
+        }
         btnEnterGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(CreateGroup.this, MainActivity.class);
-                Toast.makeText(CreateGroup.this, "You joined group" + groupId, Toast.LENGTH_LONG).show();
-                startActivity(intent);
+                if(fromMain == false) {
+                    startActivity(intent);
+                    Toast.makeText(CreateGroup.this, "Du bist Gruppe " + groupId + " beigetreten", Toast.LENGTH_LONG).show();
+                }
+                else
+                    finish();
+
             }
         });
     }

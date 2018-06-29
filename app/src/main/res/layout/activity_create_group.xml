@@ -4,23 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/party_people_2_cut_skaled"
     tools:context=".CreateGroup">
 
-    <Button
-        android:id="@+id/btnGenerateQR"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create"
-        android:layout_centerHorizontal="true">
 
-    </Button>
     <Button
         android:id="@+id/btnEnterGroup"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Enter Group"
+        android:background="@drawable/rounded_button"
+        android:layout_margin="16dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="0dp"
         android:visibility="gone"/>
 
     <LinearLayout

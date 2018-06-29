@@ -26,6 +26,13 @@ public class SplashScreen extends AppCompatActivity {
         final EditText editText = findViewById(R.id.txtGroupId);
         editText.setText("1");
 
+        final SharedPreferences sharedPref = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
+        int groupId = sharedPref.getInt("groupId", -1);
+        if(groupId != -1){
+            Intent intent = new Intent(SplashScreen.this, MainActivity.class);
+            startActivity(intent);
+        }
+
         Button mCreateGroupButton = findViewById(R.id.btnCreateGroup);
         mCreateGroupButton.setOnClickListener(new View.OnClickListener() {
             @Override

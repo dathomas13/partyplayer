@@ -11,6 +11,7 @@ public class SongInformation {
     private int groupId;
     private int upVotes;
     private int downVotes;
+    private int isCurrentSong;
 
     public SongInformation(){}
 
@@ -91,5 +92,13 @@ public class SongInformation {
 
     public void setGroupId(int groupId) {
         this.groupId = groupId;
+    }
+
+    public int getIsCurrentSong() {
+        return isCurrentSong;
+    }
+
+    public void setIsCurrentSong(int isCurrentSong) {
+        this.isCurrentSong = isCurrentSong;
     }
 }

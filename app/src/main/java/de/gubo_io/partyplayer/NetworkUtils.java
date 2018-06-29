@@ -213,7 +213,7 @@ public class NetworkUtils {
     }
 
     public interface OnSongsReceivedListener{
-        void onSongsReceived(List<SongInformation> songs);
+        void onSongsReceived(List<SongInformation> songs, SongInformation currentSong);
     }
 
     private OnSongsReceivedListener onSongsReceivedListener;
@@ -248,6 +248,7 @@ public class NetworkUtils {
 
 
                             List<SongInformation> mSongList = new ArrayList<>();
+                            SongInformation currentSong= new SongInformation();
                             for (int i = 0; i < response.length(); i++){
                                 SongInformation songInformation = new SongInformation();
                                 JSONObject song = response.getJSONObject(i);
@@ -256,8 +257,12 @@ public class NetworkUtils {
                                 songInformation.setSpotifyId(song.getString("spotifyId"));
                                 songInformation.setUpVotes(song.getInt("upVotes"));
                                 songInformation.setDownVotes(song.getInt("downVotes"));
+                                songInformation.setIsCurrentSong(song.getInt("isCurrentSong"));
                                 songInformation.setGroupId(groupId);
-                                mSongList.add(songInformation);
+                                if(songInformation.getIsCurrentSong()==0)
+                                    mSongList.add(songInformation);
+                                else
+                                    currentSong = songInformation;
                             }
                             Collections.sort(mSongList, new Comparator<SongInformation>() {
                                 @Override
@@ -269,7 +274,7 @@ public class NetworkUtils {
                                 }
                             });
 
-                            onSongsReceivedListener.onSongsReceived(mSongList);
+                            onSongsReceivedListener.onSongsReceived(mSongList,currentSong);
 
                             Log.d("status", status);
 
@@ -294,6 +299,7 @@ public class NetworkUtils {
 
         queue.add(jsonObjectRequest);
     }
+
     static void Vote(SongInformation song, int groupId, String upDown, Context context){
         RequestQueue queue = Volley.newRequestQueue(context);
         String url = "http://gubo-io.de/partyplayer/vote_song.php";
@@ -328,6 +334,84 @@ public class NetworkUtils {
                             Log.e("Response", jsonError);
                         }
                         Log.d("ERROR","error => " + error.toString());
+                    }
+                });
+
+        queue.add(jsonObjectRequest);
+    }
+
+    static void updateCurrentSong(SongInformation song, int groupId, Context context){
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = "http://gubo-io.de/partyplayer/set_current_song.php";
+
+        Map<String, String> postParam= new HashMap<String, String>();
+        postParam.put("groupId", groupId+"");
+        postParam.put("spotifyId", song.getSpotifyId());
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.POST, url, new JSONObject(postParam), new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            String status = response.getString("status");
+                            Log.d("status", status);
+
+
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String jsonError = new String(networkResponse.data);
+                            Log.e("Response", jsonError);
+                        }
+                        Log.e("ERROR","error => " + error.toString());
+                    }
+                });
+
+        queue.add(jsonObjectRequest);
+    }
+
+    static void removeSong(SongInformation song, int groupId, Context context){
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = "http://gubo-io.de/partyplayer/remove_song.php";
+
+        Map<String, String> postParam= new HashMap<String, String>();
+        postParam.put("groupId", groupId+"");
+        postParam.put("spotifyId", song.getSpotifyId());
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.POST, url, new JSONObject(postParam), new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            String status = response.getString("status");
+                            Log.d("status", status);
+
+
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String jsonError = new String(networkResponse.data);
+                            Log.e("Response", jsonError);
+                        }
+                        Log.e("ERROR","error => " + error.toString());
                     }
                 });
 
