@@ -339,7 +339,7 @@ public class NetworkUtils {
 
     static void updateCurrentSong(SongInformation song, int groupId, Context context){
         RequestQueue queue = Volley.newRequestQueue(context);
-        String url = "http://gubo-io.de/partyplayer/vote_song.php";
+        String url = "http://gubo-io.de/partyplayer/set_current_song.php";
 
         Map<String, String> postParam= new HashMap<String, String>();
         postParam.put("groupId", groupId+"");
@@ -369,7 +369,7 @@ public class NetworkUtils {
                             String jsonError = new String(networkResponse.data);
                             Log.e("Response", jsonError);
                         }
-                        Log.d("ERROR","error => " + error.toString());
+                        Log.e("ERROR","error => " + error.toString());
                     }
                 });
 
