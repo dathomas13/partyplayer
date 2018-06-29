@@ -15,10 +15,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -57,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private String spotifyAccessToken;
     List<SongInformation> mSongList = new ArrayList<>();
     final MusicListAdapter mMusicListAdapter = new MusicListAdapter();
-    private boolean isPlayer = true;
     private int groupId = 1;
 
     private int currentSong = 0;
@@ -77,13 +78,12 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         groupId = sharedPref.getInt("groupId", -1);
 
 
-        if (isPlayer) {
-            spotifyAccessToken = sharedPref.getString(ACCESS_TOKEN_NAME, "");
-            if(spotifyAccessToken.equals(""))
-                showSpotifyLoginDialog();
-            else
-                setSpotifyPlayer();
-        }
+        spotifyAccessToken = sharedPref.getString(ACCESS_TOKEN_NAME, "");
+        if (spotifyAccessToken.equals(""))
+            showSpotifyLoginDialog();
+        else
+            setSpotifyPlayer();
+
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -93,13 +93,11 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             }
         }
 
+
         mCurrentSongNameView = findViewById(R.id.tvCurrentSongName);
         mCurrentInterpretView = findViewById(R.id.tvCurrentInterpret);
 
         mPlayPauseButton = findViewById(R.id.tbPlayPause);
-
-        if (!isPlayer)
-            mPlayPauseButton.setVisibility(View.GONE);
 
         mPlayPauseButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -121,6 +119,32 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mMusicListAdapter.setContext(getApplicationContext());
         mSongListView.setAdapter(mMusicListAdapter);
 
+        final Button mMenuButton = findViewById(R.id.btMenu);
+        mMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Creating the instance of PopupMenu
+                PopupMenu popup = new PopupMenu(MainActivity.this, mMenuButton);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater()
+                        .inflate(R.menu.main_menu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Toast.makeText(
+                                MainActivity.this,
+                                "You Clicked : " + item.getTitle(),
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return true;
+                    }
+                });
+
+                popup.show();
+            }
+        });
+
         FloatingActionButton fab = findViewById(R.id.fabAdd);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,12 +158,12 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private final Player.OperationCallback mOperationCallback = new Player.OperationCallback() {
         @Override
         public void onSuccess() {
-            Log.d("operation callback:","OK!");
+            Log.d("operation callback:", "OK!");
         }
 
         @Override
         public void onError(Error error) {
-            Log.e("operation callback:",error.toString());
+            Log.e("operation callback:", error.toString());
         }
     };
 
@@ -246,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             public void onSongsReceived(List<SongInformation> songs) {
                 mSongList = songs;
                 mMusicListAdapter.setSongList(mSongList);
-                //setCurrentSongInfo();
+                setCurrentSongInfo();
             }
         });
         networkUtils.getSongs(groupId, getApplicationContext());
@@ -358,12 +382,12 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             case kSpPlaybackNotifyAudioDeliveryDone:
                 Log.e("spotify", "track ended");
 
-                if (mSongList.size() > currentSong + 1){
+                if (mSongList.size() > currentSong + 1) {
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if(!(mSongList.size()>currentSong + 1))
+                            if (!(mSongList.size() > currentSong + 1))
                                 currentSong = 0;
 
                             currentSong++;
@@ -407,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         Toast toast = Toast.makeText(getApplicationContext(), "Login war erfolgreich!", Toast.LENGTH_SHORT);
         toast.show();
 
-        if(mPlayer!=null)
+        if (mPlayer != null)
             mPlayPauseButton.setClickable(true);
 
         loadSongs();
