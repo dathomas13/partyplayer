@@ -40,6 +40,19 @@ public class CreateGroup extends AppCompatActivity {
         btnCreateGroup = findViewById(R.id.btnGenerateQR);
         btnEnterGroup = findViewById(R.id.btnEnterGroup);
         final TextView textView = findViewById(R.id.textView);
+        SharedPreferences sharedPref = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
+        groupId =  sharedPref.getInt("groupId", -1);
+        if(groupId != -1){
+            try {
+                btnEnterGroup.setVisibility(View.VISIBLE);
+                bitmap = TextToImageEncode(groupId + "");
+                imageView.setImageBitmap(bitmap);
+            }
+            catch (WriterException w){
+                Log.e("QR-Code", ""+ w.getMessage());
+            }
+        }
+
 
         btnCreateGroup.setOnClickListener(new View.OnClickListener() {
             @Override
