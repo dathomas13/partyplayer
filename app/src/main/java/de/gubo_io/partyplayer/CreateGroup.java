@@ -36,10 +36,10 @@ public class CreateGroup extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_group);
 
-        imageView = (ImageView)findViewById(R.id.image);
-        btnCreateGroup = (Button)findViewById(R.id.btnGenerateQR);
-        btnEnterGroup = (Button)findViewById(R.id.btnEnterGroup);
-        final TextView textView = (TextView)findViewById(R.id.textView);
+        imageView = findViewById(R.id.image);
+        btnCreateGroup = findViewById(R.id.btnGenerateQR);
+        btnEnterGroup = findViewById(R.id.btnEnterGroup);
+        final TextView textView = findViewById(R.id.textView);
 
         btnCreateGroup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,7 +72,7 @@ public class CreateGroup extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(CreateGroup.this, MainActivity.class);
-                Toast.makeText(CreateGroup.this, "You joined group" + groupId, Toast.LENGTH_LONG);
+                Toast.makeText(CreateGroup.this, "You joined group" + groupId, Toast.LENGTH_LONG).show();
                 startActivity(intent);
             }
         });
