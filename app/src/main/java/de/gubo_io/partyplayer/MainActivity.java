@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_v2);
 
-        SharedPreferences sharedPref = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
+        final SharedPreferences sharedPref = getSharedPreferences("playerPref", Context.MODE_PRIVATE);
         groupId = sharedPref.getInt("groupId", -1);
 
 
@@ -139,7 +139,10 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                                 startActivity(intent);
                                 break;
                             case R.id.mLogout:
-
+                                SharedPreferences.Editor editor = sharedPref.edit();
+                                editor.putInt("groupId", -1);
+                                editor.apply();
+                                finish();
                                 break;
                         }
                         return true;
@@ -445,7 +448,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
         if (mPlayer != null)
             mPlayPauseButton.setClickable(true);
-        
+
         setUpdateTimer();
     }
 
