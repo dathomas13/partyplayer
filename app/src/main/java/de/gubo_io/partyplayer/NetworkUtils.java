@@ -27,6 +27,8 @@ import org.json.JSONObject;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -257,6 +259,14 @@ public class NetworkUtils {
                                 songInformation.setGroupId(groupId);
                                 mSongList.add(songInformation);
                             }
+                            Collections.sort(mSongList, new Comparator<SongInformation>() {
+                                @Override
+                                public int compare(SongInformation o1, SongInformation o2) {
+                                    int votes1 = o1.getUpVotes() - o1.getDownVotes();
+                                    int votes2 = o2.getUpVotes() - o2.getDownVotes();
+                                    return votes2-votes1;
+                                }
+                            });
 
                             onSongsReceivedListener.onSongsReceived(mSongList);
 

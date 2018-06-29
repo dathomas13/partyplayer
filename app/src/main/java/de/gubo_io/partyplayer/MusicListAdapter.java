@@ -112,7 +112,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
                         votes--;
                         mVotes.setText(""+votes);
 
-                        NetworkUtils.Vote(currentSong,4, "down", context);
+                        NetworkUtils.Vote(currentSong,currentSong.getGroupId(), "down", context);
                     }
                     return false;
                 }
