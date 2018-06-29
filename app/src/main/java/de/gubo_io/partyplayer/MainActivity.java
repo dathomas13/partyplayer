@@ -45,6 +45,8 @@ import com.spotify.sdk.android.player.SpotifyPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements SpotifyPlayer.NotificationCallback, ConnectionStateCallback {
 
@@ -280,6 +282,17 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         networkUtils.getSongs(groupId, getApplicationContext());
     }
 
+    void setUpdateTimer(){
+        Timer mUpdateTimer = new Timer();
+        mUpdateTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                loadSongs();
+            }
+
+        }, 0, 5000);
+    }
+
     void handleSharedText(Intent intent) {
         String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
         if (sharedText != null) {
@@ -432,8 +445,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
         if (mPlayer != null)
             mPlayPauseButton.setClickable(true);
-
-        loadSongs();
+        
+        setUpdateTimer();
     }
 
     @Override
