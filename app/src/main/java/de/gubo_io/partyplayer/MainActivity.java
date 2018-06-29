@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -381,6 +382,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     void pauseSong() {
         mPlayer.pause(null);
+        mPlayPauseButton.setChecked(false);
     }
 
 
@@ -514,4 +516,13 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         Spotify.destroyPlayer(this);
         super.onDestroy();
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        pauseSong();
+        startActivity(intent);
+    }
+
 }
