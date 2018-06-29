@@ -220,7 +220,7 @@ public class NetworkUtils {
         this.onSongsReceivedListener = onSongsReceivedListener;
     }
 
-    void getSongs(int groupId, Context context){
+    void getSongs(final int groupId, Context context){
         RequestQueue queue = Volley.newRequestQueue(context);
         String url = "http://gubo-io.de/partyplayer/get_songs.php";
 
@@ -254,6 +254,7 @@ public class NetworkUtils {
                                 songInformation.setSpotifyId(song.getString("spotifyId"));
                                 songInformation.setUpVotes(song.getInt("upVotes"));
                                 songInformation.setDownVotes(song.getInt("downVotes"));
+                                songInformation.setGroupId(groupId);
                                 mSongList.add(songInformation);
                             }
 
