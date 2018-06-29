@@ -374,10 +374,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     }
 
     void setCurrentSongInfo() {
-
         mCurrentSongNameView.setText(currentSong.getName());
         mCurrentInterpretView.setText(currentSong.getArtists());
-
     }
 
     void pauseSong() {
