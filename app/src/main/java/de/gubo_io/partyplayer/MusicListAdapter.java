@@ -68,12 +68,13 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
         }
 
         void bind(int listIndex){
-            SongInformation currentSong = mSongList.get(listIndex);
+            final SongInformation currentSong = mSongList.get(listIndex);
 
             mSongName.setText(currentSong.getName());
             mInterpret.setText(currentSong.getArtists());
 
             mIndex.setText("#" + listIndex);
+            mVotes.setText("" + (currentSong.getUpVotes() - currentSong.getDownVotes()));
 
 
             mVoteUpButton.setOnTouchListener(new View.OnTouchListener() {
@@ -84,7 +85,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
                         mVoteDownButton.setPressed(false);
                         mVoteUpButton.setClickable(false);
                         mVoteDownButton.setClickable(false);
-                        int votes = Integer.parseInt(mVotes.getText().toString());
+                        int votes = currentSong.getUpVotes() - currentSong.getDownVotes();
                         votes++;
                         mVotes.setText(""+votes);
                     }
@@ -101,7 +102,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
                         mVoteUpButton.setPressed(false);
                         mVoteUpButton.setClickable(false);
                         mVoteDownButton.setClickable(false);
-                        int votes = Integer.parseInt(mVotes.getText().toString());
+                        int votes = currentSong.getUpVotes() - currentSong.getDownVotes();
                         votes--;
                         mVotes.setText(""+votes);
                     }
