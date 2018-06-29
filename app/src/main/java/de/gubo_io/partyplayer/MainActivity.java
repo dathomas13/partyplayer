@@ -124,20 +124,22 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Creating the instance of PopupMenu
                 PopupMenu popup = new PopupMenu(MainActivity.this, mMenuButton);
-                //Inflating the Popup using xml file
+
                 popup.getMenuInflater()
                         .inflate(R.menu.main_menu, popup.getMenu());
 
-                //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
-                        Toast.makeText(
-                                MainActivity.this,
-                                "You Clicked : " + item.getTitle(),
-                                Toast.LENGTH_SHORT
-                        ).show();
+                        switch (item.getItemId()){
+                            case R.id.mAddUser:
+                                Intent intent = new Intent(MainActivity.this, CreateGroup.class);
+                                startActivity(intent);
+                                break;
+                            case R.id.mLogout:
+
+                                break;
+                        }
                         return true;
                     }
                 });
