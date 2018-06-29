@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private int groupId = 1;
 
     //private int currentSong = 0;
-    private SongInformation currentSongInfo;
+    private SongInformation currentSong;
 
     private BroadcastReceiver mNetworkStateReceiver;
 
@@ -270,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             @Override
             public void onSongsReceived(List<SongInformation> songs, SongInformation currentSong) {
                 mSongList = songs;
+                MainActivity.this.currentSong = currentSong;
                 mMusicListAdapter.setSongList(mSongList);
                 setCurrentSongInfo();
             }
@@ -347,18 +348,16 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     }
 
     void playCurrentSong() {
-        String currentTrackUri = "spotify:track:" + mSongList.get(0).getSpotifyId();
+        String currentTrackUri = "spotify:track:" + currentSong.getSpotifyId();
         mPlayer.playUri(null, currentTrackUri, 0, 0);
 
         setCurrentSongInfo();
-
-        NetworkUtils.updateCurrentSong(mSongList.get(0), groupId, getApplicationContext());
     }
 
     void setCurrentSongInfo() {
 
-        mCurrentSongNameView.setText(currentSongInfo.getName());
-        mCurrentInterpretView.setText(currentSongInfo.getArtists());
+        mCurrentSongNameView.setText(currentSong.getName());
+        mCurrentInterpretView.setText(currentSong.getArtists());
 
     }
 
@@ -385,7 +384,11 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            //todo: remove old Song from Database
+                            NetworkUtils.removeSong(currentSong, groupId, getApplicationContext());
+                            NetworkUtils.updateCurrentSong(mSongList.get(0), groupId, getApplicationContext());
+                            currentSong = mSongList.get(0);
+                            mSongList.remove(0);
+                            mMusicListAdapter.notifyDataSetChanged();
                             playCurrentSong();
                         }
                     }, 2000);
