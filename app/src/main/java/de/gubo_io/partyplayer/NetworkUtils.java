@@ -277,5 +277,44 @@ public class NetworkUtils {
 
         queue.add(jsonObjectRequest);
     }
+    static void Vote(SongInformation song, int groupId, String upDown, Context context){
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = "http://gubo-io.de/partyplayer/vote_song.php";
+
+        Map<String, String> postParam= new HashMap<String, String>();
+        postParam.put("groupId", groupId+"");
+        postParam.put("spotifyId", song.getSpotifyId());
+        postParam.put("upDown", upDown);
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.POST, url, new JSONObject(postParam), new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            String status = response.getString("status");
+                            Log.d("status", status);
+
+
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse networkResponse = error.networkResponse;
+                        if (networkResponse != null && networkResponse.data != null) {
+                            String jsonError = new String(networkResponse.data);
+                            Log.e("Response", jsonError);
+                        }
+                        Log.d("ERROR","error => " + error.toString());
+                    }
+                });
+
+        queue.add(jsonObjectRequest);
+    }
 
 }
