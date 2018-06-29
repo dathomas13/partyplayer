@@ -265,6 +265,7 @@ public class NetworkUtils {
                                     int votes1 = o1.getUpVotes() - o1.getDownVotes();
                                     int votes2 = o2.getUpVotes() - o2.getDownVotes();
                                     return votes2-votes1;
+
                                 }
                             });
 
