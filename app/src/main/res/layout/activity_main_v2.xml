@@ -36,9 +36,11 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="Interpret"
+        android:text="Name"
         android:textColor="#ffffff"
         android:textSize="18sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/ivCurrentCover"
         app:layout_constraintTop_toBottomOf="@+id/tvInfo" />
@@ -52,9 +54,22 @@
         android:text="Interpret"
         android:textColor="#dedede"
         android:textSize="18sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintEnd_toStartOf="@+id/tbPlayPause"
         app:layout_constraintStart_toEndOf="@+id/ivCurrentCover"
         app:layout_constraintTop_toBottomOf="@+id/tvCurrentSongName" />
+
+    <Button
+        android:id="@+id/btMenu"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_more_vert"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ToggleButton
         android:id="@+id/tbPlayPause"
@@ -67,6 +82,7 @@
         android:checked="false"
         android:textOff=""
         android:textOn=""
+        android:clickable="false"
         app:layout_constraintBottom_toTopOf="@+id/cvContent"
         app:layout_constraintEnd_toEndOf="parent" />
 

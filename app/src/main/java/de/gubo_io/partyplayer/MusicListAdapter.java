@@ -3,7 +3,9 @@ package de.gubo_io.partyplayer;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -16,6 +18,7 @@ import java.util.List;
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.MusicItemViewHolder> {
     private Context context;
     private List<SongInformation> mSongList = new ArrayList<>();
+    private int currentSongIndex = 0;
 
     void setContext(Context context){
         this.context = context;
@@ -24,6 +27,10 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
     void setSongList(List<SongInformation> songList){
         mSongList = songList;
         notifyDataSetChanged();
+    }
+
+    void setCurrentSongIndex(int currentSongIndex){
+        this.currentSongIndex = currentSongIndex;
     }
 
 
@@ -49,6 +56,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
         TextView mSongName;
         TextView mInterpret;
         TextView mIndex;
+        TextView mVotes;
         Button mVoteUpButton;
         Button mVoteDownButton;
 
@@ -61,29 +69,59 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
             mIndex = itemView.findViewById(R.id.tvIndex);
             mVoteUpButton = itemView.findViewById(R.id.btVoteUp);
             mVoteDownButton = itemView.findViewById(R.id.btVoteDown);
+            mVotes = itemView.findViewById(R.id.txtVotes);
         }
 
         void bind(int listIndex){
-            SongInformation currentSong = mSongList.get(listIndex);
+            final SongInformation currentSong = mSongList.get(listIndex);
 
             mSongName.setText(currentSong.getName());
             mInterpret.setText(currentSong.getArtists());
 
             mIndex.setText("#" + listIndex);
+            mVotes.setText("" + (currentSong.getUpVotes() - currentSong.getDownVotes()));
 
-            mVoteUpButton.setOnClickListener(new View.OnClickListener() {
+
+            mVoteUpButton.setOnTouchListener(new View.OnTouchListener() {
                 @Override
-                public void onClick(View v) {
-
+                public boolean onTouch(View v, MotionEvent event) {
+                    if(mVoteUpButton.isClickable()){
+                        mVoteUpButton.setPressed(true);
+                        mVoteDownButton.setPressed(false);
+                        mVoteUpButton.setClickable(false);
+                        mVoteDownButton.setClickable(false);
+                        int votes = currentSong.getUpVotes() - currentSong.getDownVotes();
+                        votes++;
+                        mVotes.setText(""+votes);
+                        NetworkUtils.Vote(currentSong,currentSong.getGroupId(), "up", context);
+                    }
+                    return false;
                 }
             });
 
-            mVoteDownButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
 
+            mVoteDownButton.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if(mVoteDownButton.isClickable()){
+                        mVoteDownButton.setPressed(true);
+                        mVoteUpButton.setPressed(false);
+                        mVoteUpButton.setClickable(false);
+                        mVoteDownButton.setClickable(false);
+                        int votes = currentSong.getUpVotes() - currentSong.getDownVotes();
+                        votes--;
+                        mVotes.setText(""+votes);
+
+                        NetworkUtils.Vote(currentSong,currentSong.getGroupId(), "down", context);
+                    }
+                    return false;
                 }
             });
+
+            if(listIndex==currentSongIndex)
+                mSongName.setTextColor(context.getResources().getColor(R.color.colorAccent));
+            else
+                mSongName.setTextColor(context.getResources().getColor(R.color.colorTextLevel0));
         }
 
     }
