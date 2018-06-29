@@ -8,6 +8,7 @@ public class SongInformation {
     private String spotifyId;
     private String coverUrl;
     private Bitmap cover;
+    private int groupId;
     private int upVotes;
     private int downVotes;
 
@@ -75,6 +76,7 @@ public class SongInformation {
         this.coverUrl = coverUrl;
     }
 
+
     public Bitmap getCover() {
         return cover;
     }
@@ -83,5 +85,11 @@ public class SongInformation {
         this.cover = cover;
     }
 
+    public int getGroupId() {
+        return groupId;
+    }
 
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
+    }
 }
