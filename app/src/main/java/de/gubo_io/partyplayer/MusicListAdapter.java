@@ -93,7 +93,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
                         int votes = currentSong.getUpVotes() - currentSong.getDownVotes();
                         votes++;
                         mVotes.setText(""+votes);
-                        NetworkUtils.Vote(currentSong,1, "up", context);
+                        NetworkUtils.Vote(currentSong,4, "up", context);
                     }
                     return false;
                 }
